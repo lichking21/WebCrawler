@@ -7,8 +7,8 @@ type SafeSet struct {
 	mutex   sync.RWMutex
 }
 
-func NewSafeSet(s *SafeSet) *SafeSet {
-	return &SafeSet{visited: s.visited}
+func NewSafeSet() *SafeSet {
+	return &SafeSet{visited: make(map[string]struct{})}
 }
 
 func (s *SafeSet) Add(url string) bool {
