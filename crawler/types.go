@@ -6,8 +6,8 @@ type Task struct {
 }
 
 type Result struct {
-	Url    string
-	Links  []string
-	Images []string
-	Error  error
+	Url   string
+	Links []string
+	Depth int
+	Error error
 }
