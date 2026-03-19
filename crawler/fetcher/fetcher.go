@@ -5,13 +5,19 @@ import (
 	"log"
 	"mime"
 	"net/http"
+	"net/url"
 
 	"golang.org/x/net/html"
 )
 
 func Fetch(targetUrl string, client *http.Client) ([]string, error) {
 
-	resp, err := http.Get(targetUrl)
+	baseUrl, err := url.Parse(targetUrl)
+	if err != nil {
+		return nil, fmt.Errorf("(ERR) >> unexpected base url: %s", err)
+	}
+
+	resp, err := http.Get(baseUrl.String())
 	if err != nil {
 		return nil, fmt.Errorf("(ERR) >> failed to get response: %s", err)
 	}
@@ -53,7 +59,20 @@ func Fetch(targetUrl string, client *http.Client) ([]string, error) {
 			if t.Data == "a" {
 				for _, attr := range t.Attr {
 					if attr.Key == "href" {
-						links = append(links, attr.Val)
+						rawURL := attr.Val
+
+						parsedURL, err := url.Parse(rawURL)
+						if err != nil {
+							continue
+						}
+
+						absoluteURL := baseUrl.ResolveReference(parsedURL).String()
+
+						if parsedURL.Scheme != "" && parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
+							continue
+						}
+
+						links = append(links, absoluteURL)
 						break
 					}
 				}
