@@ -1,35 +1,25 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"time"
-	"webcrawler/crawler"
-	"webcrawler/crawler/fetcher"
 )
 
 func main() {
 
 	client := http.Client{Timeout: 10 * time.Second}
-	cache := crawler.NewSafeSet()
+	//seed := "https://go.dev"
+	seed := "http://stress-test.com"
+	workersCount := 10
+	jobsCount := 100
+	maxDepth := 2
 
-	url := "https://go.dev"
+	pool := NewPool(&client, workersCount, jobsCount, seed, maxDepth)
 
-	cache.Add(url)
+	log.Printf("Starting Web Crawler Seed:[%s] | Workers:[%d] | MaxDepth:[%d]", seed, workersCount, maxDepth)
 
-	fmt.Printf("Fetching [%s]...\n", url)
+	pool.StartPool()
 
-	links, err := fetcher.Fetch(url, &client)
-	if err != nil {
-		log.Fatalf("(ERR) >> failed to fetch [%s]: %s", url, err)
-	}
-
-	for _, link := range links {
-		if cache.Add(link) {
-			fmt.Printf("[+] New url: %s\n", link)
-		} else {
-			fmt.Printf("[-] Duplikate: %s\n", link)
-		}
-	}
+	log.Printf("All tasks done")
 }
